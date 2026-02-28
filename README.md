@@ -5,7 +5,7 @@ Laurier CP476 Project: Expense Tracker
 Our expense tracker is hosted on the web -- no installation needed!
 
 ## Stack/Technologies used
-* MongoDB
+* Supabase
 * Express.js
 * React
 * Node.js
