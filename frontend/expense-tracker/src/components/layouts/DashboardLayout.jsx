@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import { Wallet, LayoutDashboard, TrendingUp, TrendingDown, LogOut, Settings } from 'lucide-react'
+import { Wallet, LayoutDashboard, TrendingUp, TrendingDown, LogOut } from 'lucide-react'
 
 const DashboardLayout = () => {
   return (
@@ -50,14 +50,6 @@ const Navigation = () => {
 
         <div className='flex items-center gap-2'>
           <button
-            onClick={() => navigate('/settings')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive('/settings') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-100'}`}
-          >
-            <Settings className='w-4 h-4' />
-            <span className='hidden sm:inline'>Settings</span>
-          </button>
-
-          <button
             onClick={handleLogout}
             className='flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors'
           >
@@ -65,9 +57,9 @@ const Navigation = () => {
             <span className='hidden sm:inline'>Logout</span>
           </button>
 
-          <button onClick={() => navigate('/settings')} className='w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-sm font-semibold text-green-700 border-2 border-gray-200 hover:border-green-500 transition-colors ml-1'>
+          <div className='w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-sm font-semibold text-green-700 border-2 border-gray-200 ml-1'>
             {initials}
-          </button>
+          </div>
         </div>
 
       </div>

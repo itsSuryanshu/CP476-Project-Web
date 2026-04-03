@@ -1,12 +1,16 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Wallet, Mail, Lock, ArrowRight, PieChart, TrendingUp } from 'lucide-react'
 import { validateEmail } from '../../utils/helper'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
+import { UserContext } from '../../context/UserContext'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const {updateUser} = useContext(UserContext)
   const navigate = useNavigate()
 
   // handle login form submit
@@ -26,12 +30,22 @@ const Login = () => {
     setError('')
 
     // Login API Call
-  }
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {email, password})
+      const {token, user} = response.data
 
-  const handleDemo = () => {
-    localStorage.setItem('token', 'demo-token')
-    localStorage.setItem('user', JSON.stringify({ fullName: 'Demo User', email: 'demo@example.com' }))
-    navigate('/dashboard')
+      if(token){
+        localStorage.setItem('token', token)
+        updateUser(user)
+        navigate('/dashboard')
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message)
+      } else {
+        setError("Something went wrong. Please try again.")
+      }
+    }
   }
 
   return (
@@ -66,7 +80,7 @@ const Login = () => {
 
             <div className='grid sm:grid-cols-2 gap-4'>
               <FeatureCard icon={<PieChart className='w-6 h-6 text-white' />} title="Visual Insights" description="Beautiful charts and graphs to understand your spending" />
-              <FeatureCard icon={<TrendingUp className='w-6 h-6 text-white' />} title="Smart Analytics" description="Track trends and get personalized recommendations" />
+              <FeatureCard icon={<TrendingUp className='w-6 h-6 text-white' />} title="Intuitive Inputs" description="Easy income and expense inputs with just a click of a button" />
             </div>
 
             <div className='hidden lg:block rounded-2xl overflow-hidden shadow-2xl'>
@@ -124,20 +138,6 @@ const Login = () => {
                   >
                     Login
                     <ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform' />
-                  </button>
-
-                  <div className='relative flex items-center gap-3'>
-                    <div className='flex-1 h-px bg-gray-200' />
-                    <span className='text-xs text-gray-400'>or</span>
-                    <div className='flex-1 h-px bg-gray-200' />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleDemo}
-                    className='w-full border border-emerald-500 text-emerald-600 py-3 px-6 rounded-lg hover:bg-emerald-50 transition-all font-semibold text-sm'
-                  >
-                    View Demo (No login required)
                   </button>
                 </form>
 

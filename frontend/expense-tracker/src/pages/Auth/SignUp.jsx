@@ -1,7 +1,10 @@
-import React, { useState, useRef } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Wallet, Mail, Lock, User, ArrowRight, Camera, PieChart, TrendingUp } from 'lucide-react'
 import { validateEmail } from '../../utils/helper'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
+import { UserContext } from '../../context/UserContext'
 
 const SignUp = () => {
   const [name, setName] = useState('')
@@ -11,10 +14,13 @@ const SignUp = () => {
   const [error, setError] = useState(null)
   const fileInputRef = useRef(null)
   const navigate = useNavigate()
+  const {updateUser} = useContext(UserContext)
 
   // handle sign up form submit
   const handleSignUp = async (e) => {
     e.preventDefault()
+
+    let profileImageUrl = ""
 
     if (!name.trim()) {
       setError('Please enter your name')
@@ -34,6 +40,28 @@ const SignUp = () => {
     setError('')
 
     // Signup API Call
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        fullName: name.trim(),
+        email,
+        password,
+        profileImageUrl,
+      })
+
+      const {token, user} = response.data
+
+      if (token) {
+        localStorage.setItem("token", token)
+        updateUser(user)
+        navigate('/dashboard')
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message)
+      } else {
+        setError("Something went wrong. Please try again.")
+      }
+    }
   }
 
   const handlePhotoChange = (e) => {
