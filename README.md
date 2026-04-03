@@ -2,9 +2,9 @@
 Laurier CP476 Project: Expense Tracker
 
 ## Contribution
-* Frontend: Nicholas
+* Frontend: Suyanshu
 * Database: Assvin
-* Backend: Suyanshu
+* Backend: Nicholas
 
 ---
 
