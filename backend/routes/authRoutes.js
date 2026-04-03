@@ -1,10 +1,5 @@
 const express = require('express')
-<<<<<<< HEAD
-const { protect } = require('../middleware/authMiddleware')
-
-=======
 const {protect} = require('../middleware/authMiddleware')
->>>>>>> 209e755 (Implement API and Update Dashboard, Expense and Income Flows)
 const {
     registerUser,
     loginUser,
