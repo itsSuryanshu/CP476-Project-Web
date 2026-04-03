@@ -41,8 +41,8 @@ Laurier CP476 Project: Expense Tracker
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/expense-tracker.git
-   cd expense-tracker
+   git clone https://github.com/itsSuryanshu/CP476-Project-Web.git
+   cd CP476-Project-Web
    ```
 
 2. **Install backend dependencies**
@@ -53,28 +53,29 @@ Laurier CP476 Project: Expense Tracker
 
 3. **Install frontend dependencies**
    ```bash
-   cd ../frontend
+   cd ../frontend/expense-tracker
    npm install
    ```
 
 4. **Set up environment variables**
 
-   Create a `.env` file in the `backend/` folder:
+   Create a `.env` file in the `backend/` folder, or copy `backend/.env.example`:
    ```
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
    PORT=8000
+   CLIENT_URL=http://localhost:5173
    ```
 
 5. **Run the backend**
    ```bash
    cd backend
-   node server.js
+   npm run dev
    ```
 
 6. **Run the frontend**
    ```bash
-   cd frontend
+   cd frontend/expense-tracker
    npm run dev
    ```
 
