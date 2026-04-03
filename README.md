@@ -1,8 +1,10 @@
-# 💸 Expense Tracker
+# CP476-Project-Web
+Laurier CP476 Project: Expense Tracker
 
-A full-stack expense tracking web application built with the MERN stack (MongoDB, Express, React, Node.js). Track your income and expenses, visualize spending habits, and manage your personal finances in one place.
-
-> 🚧 **This project is currently in progress.**
+## Contribution
+* Frontend: Nicholas
+* Database: Assvin
+* Backend: Suyanshu
 
 ---
 
