@@ -43,9 +43,9 @@ const Navigation = () => {
         </Link>
 
         <div className='flex items-center gap-1'>
-          <NavLink to="/dashboard" active={isActive('/dashboard')} icon={<LayoutDashboard className='w-4 h-4' />} label="Dashboard" />
-          <NavLink to="/income" active={isActive('/income')} icon={<TrendingUp className='w-4 h-4' />} label="Income" />
-          <NavLink to="/expense" active={isActive('/expense')} icon={<TrendingDown className='w-4 h-4' />} label="Expense" />
+          <NavLink to="/dashboard" active={isActive('/dashboard')} icon={<LayoutDashboard className='w-4 h-4' />} label="Dashboard" hoverTone='blue' />
+          <NavLink to="/income" active={isActive('/income')} icon={<TrendingUp className='w-4 h-4' />} label="Income" hoverTone='green' />
+          <NavLink to="/expense" active={isActive('/expense')} icon={<TrendingDown className='w-4 h-4' />} label="Expense" hoverTone='red' />
         </div>
 
         <div className='flex items-center gap-2'>
@@ -67,12 +67,21 @@ const Navigation = () => {
   )
 }
 
-const NavLink = ({ to, active, icon, label }) => (
-  <Link
-    to={to}
-    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
-  >
-    {icon}
-    <span>{label}</span>
-  </Link>
-)
+const NavLink = ({ to, active, icon, label, hoverTone = 'blue' }) => {
+  const activeStyles = {
+    green: 'text-green-600 bg-green-50',
+    blue: 'text-blue-600 bg-blue-50',
+    red: 'text-red-600 bg-red-50',
+  }
+  const inactiveStyles = 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active ? activeStyles[hoverTone] : inactiveStyles}`}
+    >
+      {icon}
+      <span>{label}</span>
+    </Link>
+  )
+}

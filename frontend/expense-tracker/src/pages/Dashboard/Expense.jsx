@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Plus, TrendingDown, Calendar, Download, Trash2, X } from 'lucide-react'
+import { Plus, TrendingDown, Calendar, Download, Trash2, X, Pencil } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPaths'
@@ -40,9 +40,21 @@ const normalizeExpenseItem = (item) => ({
   date: item?.date || new Date().toISOString(),
 })
 
+const toDateInputValue = (value) => {
+  if (!value) return ''
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return ''
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 const Expense = () => {
   const [timePeriod, setTimePeriod] = useState('year')
   const [showModal, setShowModal] = useState(false)
+  const [showUpdateModal, setShowUpdateModal] = useState(false)
+  const [editingExpenseId, setEditingExpenseId] = useState(null)
   const [emoji, setEmoji] = useState('🛒')
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
@@ -113,6 +125,36 @@ const Expense = () => {
     } catch (submitError) {
       setError(submitError.response?.data?.message || 'Unable to add expense right now.')
       toast.error(submitError.response?.data?.message || 'Unable to add expense right now.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleUpdateExpense = async () => {
+    if (!editingExpenseId) return
+    if (!category.trim()) { setError('Please enter a category'); return }
+    if (!amount || isNaN(amount) || Number(amount) <= 0) { setError('Please enter a valid amount'); return }
+    if (!date) { setError('Please select a date'); return }
+
+    setSubmitting(true)
+    setError('')
+
+    try {
+      await axiosInstance.put(API_PATHS.EXPENSE.UPDATE_EXPENSE(editingExpenseId), {
+        icon: emoji,
+        category: category.trim(),
+        description: description.trim(),
+        amount: Number(amount),
+        date,
+      })
+      resetForm()
+      setEditingExpenseId(null)
+      setShowUpdateModal(false)
+      toast.success('Expense updated successfully')
+      fetchExpenses()
+    } catch (updateError) {
+      setError(updateError.response?.data?.message || 'Unable to update expense right now.')
+      toast.error(updateError.response?.data?.message || 'Unable to update expense right now.')
     } finally {
       setSubmitting(false)
     }
@@ -235,6 +277,23 @@ const Expense = () => {
                   <div className='flex items-center gap-3'>
                     <span className='text-xl font-bold text-red-600'>-{formatCurrency(expense.amount)}</span>
                     <button
+                      type='button'
+                      onClick={() => {
+                        setShowModal(false)
+                        setError('')
+                        setEditingExpenseId(expense.id)
+                        setEmoji(expense.icon)
+                        setCategory(expense.category)
+                        setDescription(expense.description)
+                        setAmount(String(expense.amount ?? ''))
+                        setDate(toDateInputValue(expense.date))
+                        setShowUpdateModal(true)
+                      }}
+                      className='opacity-0 group-hover:opacity-100 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all'
+                    >
+                      <Pencil className='w-4 h-4' />
+                    </button>
+                    <button
                       onClick={() => handleDelete(expense.id)}
                       className='opacity-0 group-hover:opacity-100 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all'
                     >
@@ -266,6 +325,26 @@ const Expense = () => {
           commonEmojis={commonEmojis}
           onAdd={handleAddExpense}
           onClose={() => { setShowModal(false); resetForm() }}
+          submitting={submitting}
+        />
+      )}
+
+      {showUpdateModal && (
+        <UpdateExpenseModal
+          emoji={emoji}
+          setEmoji={setEmoji}
+          category={category}
+          setCategory={setCategory}
+          description={description}
+          setDescription={setDescription}
+          amount={amount}
+          setAmount={setAmount}
+          date={date}
+          setDate={setDate}
+          error={error}
+          commonEmojis={commonEmojis}
+          onClose={() => { setShowUpdateModal(false); setEditingExpenseId(null); resetForm() }}
+          onUpdate={handleUpdateExpense}
           submitting={submitting}
         />
       )}
@@ -357,6 +436,93 @@ const AddExpenseModal = ({ emoji, setEmoji, category, setCategory, description, 
         </button>
         <button onClick={onAdd} disabled={submitting} className='px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60'>
           {submitting ? 'Saving...' : 'Add Expense'}
+        </button>
+      </div>
+    </div>
+  </div>
+)
+
+const UpdateExpenseModal = ({ emoji, setEmoji, category, setCategory, description, setDescription, amount, setAmount, date, setDate, error, commonEmojis, onUpdate, onClose, submitting }) => (
+  <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
+    <div className='absolute inset-0 bg-black/50' onClick={onClose} />
+    <div className='relative z-10 bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6'>
+      <div className='flex items-center justify-between mb-4'>
+        <h2 className='text-xl font-semibold text-gray-900'>Update Expense</h2>
+        <button onClick={onClose} className='text-gray-400 hover:text-gray-600'>
+          <X className='w-5 h-5' />
+        </button>
+      </div>
+      <p className='text-sm text-gray-500 mb-5'>Update the expense transaction details.</p>
+
+      <div className='space-y-4'>
+        <div>
+          <label className='text-sm font-medium text-gray-700 mb-2 block'>Emoji</label>
+          <div className='flex gap-2 flex-wrap'>
+            {commonEmojis.map((item) => (
+              <button
+                key={item}
+                type='button'
+                onClick={() => setEmoji(item)}
+                className={`text-2xl w-11 h-11 rounded-lg border-2 transition-all hover:scale-105 ${emoji === item ? 'border-red-600 bg-red-50' : 'border-gray-200 hover:border-red-300'}`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className='text-sm font-medium text-gray-700 mb-1.5 block'>Category</label>
+          <input
+            placeholder='e.g., Food, Transportation, Utilities, etc.'
+            value={category}
+            onChange={({ target }) => setCategory(target.value)}
+            className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500'
+          />
+        </div>
+        <div>
+          <label className='text-sm font-medium text-gray-700 mb-1.5 block'>Description</label>
+          <input
+            placeholder='e.g., McDonalds, Uber to work, Hydro bill, etc.'
+            value={description}
+            onChange={({ target }) => setDescription(target.value)}
+            className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500'
+          />
+        </div>
+
+        <div>
+          <label className='text-sm font-medium text-gray-700 mb-1.5 block'>Amount</label>
+          <div className='relative'>
+            <span className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm'>$</span>
+            <input
+              type='number'
+              placeholder='0.00'
+              value={amount}
+              onChange={({ target }) => setAmount(target.value)}
+              className='w-full pl-7 pr-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500'
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className='text-sm font-medium text-gray-700 mb-1.5 block'>Date</label>
+          <input
+            type='date'
+            value={date}
+            onChange={({ target }) => setDate(target.value)}
+            className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500'
+          />
+        </div>
+
+        {error && <p className='text-red-500 text-xs'>{error}</p>}
+      </div>
+
+      <div className='flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-100'>
+        <button onClick={onClose} className='px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors'>
+          Cancel
+        </button>
+        <button onClick={onUpdate} disabled={submitting} className='px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60'>
+          {submitting ? 'Updating...' : 'Update Expense'}
         </button>
       </div>
     </div>

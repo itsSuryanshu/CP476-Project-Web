@@ -26,7 +26,7 @@ exports.addExpense = async (req, res) => {
         await newExpense.save()
         res.status(200).json(newExpense)
     } catch (error) {
-        res.status(500).json({message: 'Server Error'})
+        res.status(500).json({message: 'Server Error on Add Expense'})
     }
 }
 
@@ -45,7 +45,40 @@ exports.getAllExpense = async (req, res) => {
 
         res.json(expense)
     } catch (error) {
-        res.status(500).json({message: 'Server Error'})
+        res.status(500).json({message: 'Server Error on Get All Expense'})
+    }
+}
+
+// update expense source
+exports.updateExpense = async (req, res) => {
+    const userId = req.user.id
+
+    try {
+        const {icon, category, description, amount, date} = req.body
+
+        if (!category || amount === undefined || amount === '' || !date) {
+            return res.status(400).json({message: 'All fields are required'})
+        }
+
+        const updatedExpense = await Expense.findOneAndUpdate(
+            {_id: req.params.id, userId},
+            {
+                icon,
+                category,
+                description,
+                amount,
+                date: parseInputDate(date),
+            },
+            {new: true}
+        )
+
+        if (!updatedExpense) {
+            return res.status(404).json({message: 'Expense not found'})
+        }
+
+        res.json(updatedExpense)
+    } catch (error) {
+        res.status(500).json({message: 'Server Error on Update'})
     }
 }
 
@@ -55,7 +88,7 @@ exports.deleteExpense = async (req, res) => {
         await Expense.findByIdAndDelete(req.params.id)
         res.json({message: 'Expense deleted successfully'})
     } catch (error) {
-        res.status(500).json({message: 'Server Error'})
+        res.status(500).json({message: 'Server Error on Delete'})
     }
 }
 
@@ -82,6 +115,6 @@ exports.downloadExpenseExcel = async (req, res) => {
         xlsx.writeFile(wb, 'expense_details.xlsx')
         res.download('expense_details.xlsx')
     } catch (error) {
-        res.status(500).json({message: 'Server Error'})
+        res.status(500).json({message: 'Server Error on Download Excel'})
     }
 }
