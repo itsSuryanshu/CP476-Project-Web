@@ -89,9 +89,9 @@ const Home = () => {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-5 mb-8'>
-          <StatCard title='Total Balance' value={formatCurrency(dashboardData.totals.balance)} sub={getRangeLabel(timePeriod)} icon={<Wallet className='w-5 h-5 text-blue-600' />} iconBg='bg-blue-100' valueColor='text-blue-600' />
-          <StatCard title='Total Income' value={formatCurrency(dashboardData.totals.income)} sub={getRangeLabel(timePeriod)} icon={<TrendingUp className='w-5 h-5 text-green-600' />} iconBg='bg-green-100' valueColor='text-green-600' />
-          <StatCard title='Total Expenses' value={formatCurrency(dashboardData.totals.expense)} sub={getRangeLabel(timePeriod)} icon={<TrendingDown className='w-5 h-5 text-red-600' />} iconBg='bg-red-100' valueColor='text-red-600' />
+          <StatCard title='Total Balance' value={formatCurrency(dashboardData.totals.balance)} sub={getRangeLabel(timePeriod)} icon={<Wallet className='w-5 h-5 text-blue-600' />} iconBg='bg-blue-100' valueColor='text-blue-600' hoverTone='blue' onClick={() => navigate('/dashboard')} />
+          <StatCard title='Total Income' value={formatCurrency(dashboardData.totals.income)} sub={getRangeLabel(timePeriod)} icon={<TrendingUp className='w-5 h-5 text-green-600' />} iconBg='bg-green-100' valueColor='text-green-600' hoverTone='green' onClick={() => navigate('/income')} />
+          <StatCard title='Total Expenses' value={formatCurrency(dashboardData.totals.expense)} sub={getRangeLabel(timePeriod)} icon={<TrendingDown className='w-5 h-5 text-red-600' />} iconBg='bg-red-100' valueColor='text-red-600' hoverTone='red' onClick={() => navigate('/expense')} />
         </div>
 
         {loading ? (
@@ -220,13 +220,24 @@ const Home = () => {
 
 export default Home
 
-const StatCard = ({ title, value, sub, icon, iconBg, valueColor }) => (
-  <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
-    <div className='flex items-center justify-between mb-3'>
-      <p className='text-sm font-medium text-gray-500'>{title}</p>
-      <div className={`w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center`}>{icon}</div>
+const StatCard = ({ title, value, sub, icon, iconBg, valueColor, hoverTone = 'blue', onClick }) => {
+  // border colors 
+  const hovorClass = {
+    green: 'hover:border-green-200',
+    red: 'hover:border-red-200',
+    blue: 'hover:border-blue-200',
+  }
+  return (
+    <div
+      className={`bg-white rounded-xl shadow-sm border-2 border-gray-100 p-6 cursor-pointer hover:shadow-lg ${hovorClass[hoverTone]} transition-all`}
+      onClick={onClick}
+    >
+      <div className='flex items-center justify-between mb-3'>
+        <p className='text-sm font-medium text-gray-500'>{title}</p>
+        <div className={`w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center`}>{icon}</div>
+      </div>
+      <div className={`text-3xl font-bold ${valueColor}`}>{value}</div>
+      <p className='text-xs text-gray-400 mt-1'>{sub}</p>
     </div>
-    <div className={`text-3xl font-bold ${valueColor}`}>{value}</div>
-    <p className='text-xs text-gray-400 mt-1'>{sub}</p>
-  </div>
-)
+  )
+}
