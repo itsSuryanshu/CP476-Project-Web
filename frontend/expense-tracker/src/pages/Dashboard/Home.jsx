@@ -221,6 +221,7 @@ const Home = () => {
 export default Home
 
 const StatCard = ({ title, value, sub, icon, iconBg, valueColor, hoverTone = 'blue', onClick }) => {
+  // border colors 
   const hovorClass = {
     green: 'hover:border-green-200',
     red: 'hover:border-red-200',
