@@ -59,13 +59,65 @@ Laurier CP476 Project: Expense Tracker
 
 4. **Set up environment variables**
 
-   Create a `.env` file in the `backend/` folder, or copy `backend/.env.example`:
+   Copy the example file into a real `.env` file inside `backend/`:
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+
+   Your `backend/.env` should look like this:
    ```
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
    PORT=8000
+   ```
+
+   `CLIENT_URL` is not required for local setup. The backend currently allows requests from any origin if `CLIENT_URL` is not set. If you want to restrict CORS later, you can add:
+   ```
    CLIENT_URL=http://localhost:5173
    ```
+
+   **Option A: Use MongoDB locally**
+
+   1. Install MongoDB Community Edition or use MongoDB Compass with a local MongoDB server.
+   2. Start MongoDB on your machine.
+   3. Use this value in `MONGO_URI`:
+      ```
+      MONGO_URI=mongodb://127.0.0.1:27017/expense-tracker
+      ```
+   4. The database `expense-tracker` will be created automatically when the app first writes data.
+
+   **Option B: Use a MongoDB Atlas cluster**
+
+   1. Create an account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register).
+   2. Create a new cluster. The free tier is enough for local development.
+   3. In Atlas, create a database user with a username and password.
+   4. In `Network Access`, add your current IP address, or use `0.0.0.0/0` only for temporary development access.
+   5. Click `Connect` on your cluster, choose `Drivers`, and copy the connection string.
+   6. Replace `<username>`, `<password>`, and `<dbname>` with your values. A typical example looks like:
+      ```
+      MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/expense-tracker?retryWrites=true&w=majority
+      ```
+   7. Save that full string in `backend/.env`.
+
+   **How to create `JWT_SECRET`**
+
+   `JWT_SECRET` should be a long random string that only you know. You can generate one in any of these ways:
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+
+   Example:
+   ```
+   JWT_SECRET=4c7b8f9f4f8f4e6d0b9f0d3d8e7a1c2f5b6a7d8e9f0a1b2c3d4e5f6a7b8c9d0
+   ```
+
+   After updating `.env`, make sure it contains either your local MongoDB URI or your Atlas cluster URI before starting the backend.
 
 5. **Run the backend**
    ```bash
